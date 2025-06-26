@@ -1,36 +1,66 @@
 <script>
   import { onMount } from 'svelte';
   import ExpenseForm from './components/ExpenseForm.svelte';
+  import IncomeForm from './components/IncomeForm.svelte';
+  import ExpensesPage from './components/ExpensesPage.svelte';
+  import IncomesPage from './components/IncomesPage.svelte';
+  import AccountsPage from './components/AccountsPage.svelte';
+  import CategoriesList from './components/CategoriesList.svelte';
   import ExpensesList from './components/ExpensesList.svelte';
   import Summary from './components/Summary.svelte';
+  import AccountsList from './components/AccountsList.svelte';
 
   let expenses = [];
+  let current = 'expenses'; // expenses | incomes | accounts | categories
   let summary = [];
+  let accounts = [];
 
+  const fetchNoCache = (url) => {
+    const ts = Date.now();
+    const sep = url.includes('?') ? '&' : '?';
+    return fetch(`${url}${sep}ts=${ts}`, { cache: 'no-store' });
+  };
+
+  const loadAccounts = async () => {
+    const res = await fetchNoCache('/api/accounts/');
+    accounts = await res.json();
+  };
   const loadExpenses = async () => {
-    const res = await fetch('/api/expenses');
+    const res = await fetchNoCache('/api/expenses/');
     expenses = await res.json();
   };
   const loadSummary = async () => {
-    const res = await fetch('/api/expenses/summary');
+    const res = await fetchNoCache('/api/expenses/summary');
     summary = await res.json();
   };
 
   const refresh = async () => {
     await loadExpenses();
     await loadSummary();
+    await loadAccounts();
   };
 
   onMount(refresh);
 </script>
 
-<main>
+<nav>
+    <button on:click={() => current='expenses'} class:active={current==='expenses'}>Расходы</button>
+    <button on:click={() => current='incomes'} class:active={current==='incomes'}>Доходы</button>
+    <button on:click={() => current='accounts'} class:active={current==='accounts'}>Счета</button>
+    <button on:click={() => current='categories'} class:active={current==='categories'}>Категории</button>
+  </nav>
+
+  <main>
   <h1>Семейный бюджет</h1>
-  <ExpenseForm on:add={refresh} />
-  <h2>Последние траты</h2>
-  <ExpensesList {expenses} />
-  <h2>Сводка по категориям</h2>
-  <Summary {summary} />
+  {#if current==='expenses'}
+    <ExpensesPage {expenses} {summary} refreshGlobal={refresh} />
+  {:else if current==='incomes'}
+    <IncomesPage refreshGlobal={refresh} />
+  {:else if current==='accounts'}
+    <AccountsPage refreshGlobal={refresh} />
+  {:else if current==='categories'}
+    <CategoriesList />
+  {/if}
 </main>
 
 <style>
@@ -39,5 +69,21 @@
     margin: 0 auto;
     padding: 1rem;
     font-family: Arial, sans-serif;
+  }
+  nav {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+  }
+  nav button {
+    padding: 0.5rem 1rem;
+    border: none;
+    background: #eee;
+    cursor: pointer;
+  }
+  nav button.active {
+    background: #2196f3;
+    color: white;
   }
 </style>
