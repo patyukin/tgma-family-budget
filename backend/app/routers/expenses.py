@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func
+from sqlalchemy.orm import selectinload
 from typing import List
 
 from ..database import get_session
@@ -12,13 +13,24 @@ router = APIRouter(prefix="/api/expenses", tags=["expenses"])
 async def create_expense(payload: schemas.ExpenseCreate, session: AsyncSession = Depends(get_session)):
     expense = models.Expense(**payload.model_dump())
     session.add(expense)
-    await session.commit()
-    await session.refresh(expense)
-    return expense
+
+    # update account balance
+    account = await session.get(models.Account, payload.account_id)
+    if account:
+        if account.balance < payload.amount:
+            raise HTTPException(status_code=400, detail="Insufficient funds on account")
+        account.balance -= payload.amount
+
+        await session.commit()
+    # reload with category eagerly loaded to avoid greenlet issues
+    res = await session.execute(
+        select(models.Expense).options(selectinload(models.Expense.category)).where(models.Expense.id == expense.id)
+    )
+    return res.scalar_one()
 
 @router.get("/", response_model=List[schemas.ExpenseOut])
 async def list_expenses(session: AsyncSession = Depends(get_session)):
-    res = await session.execute(select(models.Expense).order_by(models.Expense.spent_at.desc()))
+    res = await session.execute(select(models.Expense).options(selectinload(models.Expense.category)).order_by(models.Expense.spent_at.desc()))
     return res.scalars().all()
 
 @router.get("/summary", response_model=List[schemas.ExpenseSummary])

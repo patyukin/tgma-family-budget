@@ -6,21 +6,18 @@
   let amount = '';
   let description = '';
   let category_id = '';
+  let account_id = '';
   let categories = [];
   let accounts = [];
-  let account_id = '';
 
   const loadData = async () => {
-    const resCat = await fetch('/api/categories/');
-    categories = await resCat.json();
-    const resAcc = await fetch('/api/accounts/');
-    accounts = await resAcc.json();
+    categories = await (await fetch('/api/categories/')).json();
+    accounts = await (await fetch('/api/accounts/')).json();
   };
-
   onMount(loadData);
 
-  const addExpense = async () => {
-    const res = await fetch('/api/expenses/', {
+  const addIncome = async () => {
+    const res = await fetch('/api/incomes/', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ amount, description, category_id: category_id || null, account_id }),
@@ -30,7 +27,7 @@
       dispatch('add');
     } else {
       const err = await res.json().catch(() => ({}));
-      alert(err.detail || 'Ошибка при добавлении расхода');
+      alert(err.detail || 'Ошибка при добавлении дохода');
     }
   };
   // --- helpers to add new category / account ---
@@ -86,7 +83,7 @@
   };
 </script>
 
-<form on:submit|preventDefault={addExpense}>
+<form on:submit|preventDefault={addIncome} style="margin-bottom:1rem;display:flex;gap:0.5rem;flex-wrap:wrap;">
   <input required type="number" step="0.01" placeholder="Сумма" bind:value={amount} />
   <input type="text" placeholder="Описание" bind:value={description} />
   <select bind:value={category_id} on:change={handleCategoryChange}>
@@ -103,17 +100,5 @@
       <option value={acc.id}>{acc.name} ({acc.balance})</option>
     {/each}
   </select>
-  <button type="submit">Добавить</button>
+  <button type="submit">Добавить доход</button>
 </form>
-
-<style>
-  form {
-    display: flex;
-    gap: 0.5rem;
-    margin-bottom: 1rem;
-  }
-  input, button, select {
-    padding: 0.5rem;
-    font-size: 1rem;
-  }
-</style>
