@@ -1,0 +1,34 @@
+# Production Caddy configuration for MA-Pomodoro
+# Uses env placeholders so the same file works on any host.
+#
+#  Required env vars (examples):
+#    DOMAIN              = pomodoro.example.com     # public root domain
+#    API_UPSTREAM        = backend:8000             # docker-compose backend service
+#    FRONTEND_UPSTREAM   = frontend:80              # docker-compose frontend service
+#
+# Telegram Mini App URL  👉  https://{$DOMAIN}
+# The proxy routes /api/* to FastAPI backend, everything else to the SPA.
+
+{$DOMAIN} {
+    encode gzip zstd
+
+    # ----- API  -----------------------------------------------------------
+    @api {
+        path /api/*
+        path /docs* /redoc* /openapi.json /health
+        path /webhook/*
+    }
+    reverse_proxy @api {$API_UPSTREAM}
+
+    # ----- Static Frontend  ----------------------------------------------
+    handle {
+        reverse_proxy {$FRONTEND_UPSTREAM}
+    }
+
+    # Security headers (feel free to adjust)
+    header {
+        X-Content-Type-Options nosniff
+        X-Frame-Options "SAMEORIGIN"
+        Referrer-Policy "strict-origin-when-cross-origin"
+    }
+}

@@ -1,0 +1,16 @@
+# Ignore unnecessary files for Docker build context
+**/node_modules
+**/dist
+**/.svelte-kit
+
+# Git files
+.git
+.gitignore
+
+# IDE
+.vscode
+.idea
+
+# Logs
+*.log
+logs

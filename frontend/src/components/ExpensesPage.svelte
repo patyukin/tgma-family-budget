@@ -1,10 +1,12 @@
-<script>
+<script lang="ts">
   import ExpenseForm from './ExpenseForm.svelte';
   import ExpensesList from './ExpensesList.svelte';
   import Summary from './Summary.svelte';
-  export let expenses = [];
-  export let summary = [];
-  export let refreshGlobal;
+  import type { Expense, SummaryItem } from '../lib/types';
+  
+  export let expenses: Expense[] = [];
+  export let summary: SummaryItem[] = [];
+  export let refreshGlobal: () => Promise<void>;
 </script>
 
 <ExpenseForm on:add={refreshGlobal} />

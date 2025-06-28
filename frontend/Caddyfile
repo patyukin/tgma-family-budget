@@ -6,6 +6,9 @@
 	root * /usr/share/caddy
 	file_server
 
+	# API proxy - preserve /api prefix when forwarding
+	reverse_proxy /api/* fb-backend:8000
+
 	# SPA routing
 	# Serve static assets if they exist; otherwise, fallback to SPA entry point
 	try_files {path} {path}/ /index.html

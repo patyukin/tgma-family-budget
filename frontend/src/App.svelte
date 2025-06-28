@@ -1,5 +1,6 @@
-<script>
+<script lang="ts">
   import { onMount } from 'svelte';
+  import type { Account, Expense, SummaryItem } from './lib/types';
   import ExpenseForm from './components/ExpenseForm.svelte';
   import IncomeForm from './components/IncomeForm.svelte';
   import ExpensesPage from './components/ExpensesPage.svelte';
@@ -9,13 +10,19 @@
   import ExpensesList from './components/ExpensesList.svelte';
   import Summary from './components/Summary.svelte';
   import AccountsList from './components/AccountsList.svelte';
+  import ModalDialog from './components/ModalDialog.svelte';
 
-  let expenses = [];
-  let current = 'expenses'; // expenses | incomes | accounts | categories
-  let summary = [];
-  let accounts = [];
+  let expenses: Expense[] = [];
+  let current: 'expenses' | 'incomes' | 'accounts' | 'categories' = 'expenses'; // expenses | incomes | accounts | categories
+  let summary: SummaryItem[] = [];
+  let accounts: Account[] = [];
 
-  const fetchNoCache = (url) => {
+  /**
+   * Fetch без использования кеша, добавляет query-параметр ts
+   * @param {string} url
+   * @returns {Promise<Response>}
+   */
+  const fetchNoCache = (url: string): Promise<Response> => {
     const ts = Date.now();
     const sep = url.includes('?') ? '&' : '?';
     return fetch(`${url}${sep}ts=${ts}`, { cache: 'no-store' });
@@ -62,6 +69,8 @@
     <CategoriesList />
   {/if}
 </main>
+
+<ModalDialog />
 
 <style>
   main {

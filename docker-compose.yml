@@ -1,45 +1,49 @@
 services:
+  # Backend Service
   fb-backend:
     build:
       context: .
-      dockerfile: Dockerfile.backend
-    command: uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+      dockerfile: backend.Dockerfile
+    environment:
+      - BOT_TOKEN=${BOT_TOKEN}
+      - TELEGRAM_MINI_APP_URL=${TELEGRAM_MINI_APP_URL}
+      - TELEGRAM_WEBHOOK_URL=${TELEGRAM_WEBHOOK_URL}
+      - DATABASE_URL=postgresql+asyncpg://postgres:postgres@fb-db:5432/pomodoro
+    ports:
+      - "${BACKEND_PORT}:8000"
+    working_dir: /app
     volumes:
       - ./backend:/app
-    environment:
-      - DATABASE_URL=postgresql+asyncpg://budget:budgetpwd@fb-db:5432/budgetdb
+      - ./logs:/app/logs
     depends_on:
       - fb-db
-    ports:
-      - "3030:8000"
+    restart: unless-stopped
 
+  # Frontend Service  
   fb-frontend:
     build:
       context: .
-      dockerfile: Dockerfile.frontend
-      target: builder
-    command: npm run dev -- --host 0.0.0.0 --port 5173
-    volumes:
-      - ./frontend:/app
-      - /app/node_modules
+      dockerfile: frontend.Dockerfile
     environment:
-      - CHOKIDAR_USEPOLLING=true
+      - VITE_API_URL=http://localhost:${BACKEND_PORT}
+      - VITE_TELEGRAM_MINI_APP_URL=${TELEGRAM_MINI_APP_URL}
+    ports:
+      - "${FRONTEND_PORT}:80"
     depends_on:
       - fb-backend
-    ports:
-      - "3031:5173"
+    restart: unless-stopped
 
   fb-db:
     image: postgres:15-alpine
     environment:
-      POSTGRES_USER: budget
-      POSTGRES_PASSWORD: budgetpwd
-      POSTGRES_DB: budgetdb
+      - POSTGRES_DB=pomodoro
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
     volumes:
-      - fb-db_data:/var/lib/postgresql/data
-      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+      - fb_db_data:/var/lib/postgresql/data
     ports:
       - "3032:5432"
+    restart: unless-stopped
 
 volumes:
-  fb-db_data:
+  fb_db_data:

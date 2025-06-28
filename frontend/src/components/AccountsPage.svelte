@@ -1,19 +1,23 @@
-<script>
+<script lang="ts">
   import { onMount } from 'svelte';
+  import { showAlert, showPrompt } from '../lib/dialog.js';
   import AccountsList from './AccountsList.svelte';
+  import type { Account } from '../lib/types';
+
   export let refreshGlobal;
 
-  let accounts = [];
+  let accounts: Account[] = [];
   const loadAccounts = async () => {
-    accounts = await (await fetch('/api/accounts/')).json();
+    const res = await fetch('/api/accounts');
+    accounts = await res.json();
   };
   onMount(loadAccounts);
 
-  const handleDeposit = async (acc) => {
-    const amtStr = prompt(`Сколько зачислить на «${acc.name}»?`, '0');
+  const handleDeposit = async (acc: Account) => {
+    const amtStr = await showPrompt(`Сколько зачислить на «${acc.name}»?`, '0');
     if (!amtStr) return;
     const amount = parseFloat(amtStr);
-    if (!amount || amount<=0) return alert('Некорректная сумма');
+    if (!amount || amount<=0) { await showAlert('Некорректная сумма'); return; }
     const res = await fetch('/api/incomes/', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -23,14 +27,14 @@
       await loadAccounts();
       refreshGlobal && refreshGlobal();
     } else {
-      alert('Не удалось зачислить средства');
+      await showAlert('Не удалось зачислить средства');
     }
   };
 
   const addAccount = async () => {
-    const name = prompt('Название счёта:');
+    const name = await showPrompt('Название счёта:');
     if (!name) return;
-    const balStr = prompt('Начальный баланс:', '0');
+    const balStr = await showPrompt('Начальный баланс:', '0');
     if (balStr === null) return;
     const balance = parseFloat(balStr) || 0;
 
@@ -44,7 +48,7 @@
       refreshGlobal && refreshGlobal();
     } else {
       const err = await res.json().catch(() => ({}));
-      alert(err.detail || 'Не удалось создать счёт');
+      await showAlert(err.detail || 'Не удалось создать счёт');
     }
   };
 </script>

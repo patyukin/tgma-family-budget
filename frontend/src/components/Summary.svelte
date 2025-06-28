@@ -1,5 +1,6 @@
-<script>
-  export let summary = [];
+<script lang="ts">
+  import type { SummaryItem } from '../lib/types';
+  export let summary: SummaryItem[] = [];
 </script>
 
 <table>

@@ -1,12 +1,12 @@
-<script>
+<script lang="ts">
   import { onMount } from 'svelte';
+  import type { Category } from '../lib/types';
 
-  let categories = [];
+  let categories: Category[] = [];
 
-  const loadCategories = async () => {
+  onMount(async () => {
     categories = await (await fetch('/api/categories/')).json();
-  };
-  onMount(loadCategories);
+  });
 </script>
 
 <h2>Категории</h2>

@@ -1,5 +1,7 @@
-<script>
+<script lang="ts">
   import { createEventDispatcher, onMount } from 'svelte';
+  import { showAlert, showPrompt } from '../lib/dialog.js';
+  import type { Category, Account } from '../lib/types';
 
   const dispatch = createEventDispatcher();
 
@@ -7,8 +9,8 @@
   let description = '';
   let category_id = '';
   let account_id = '';
-  let categories = [];
-  let accounts = [];
+  let categories: Category[] = [];
+  let accounts: Account[] = [];
 
   const loadData = async () => {
     categories = await (await fetch('/api/categories/')).json();
@@ -27,12 +29,12 @@
       dispatch('add');
     } else {
       const err = await res.json().catch(() => ({}));
-      alert(err.detail || 'Ошибка при добавлении дохода');
+      await showAlert(err.detail || 'Ошибка при добавлении дохода');
     }
   };
   // --- helpers to add new category / account ---
   const addCategory = async () => {
-    const name = prompt('Название новой категории:');
+    const name = await showPrompt('Название новой категории:');
     if (!name) return;
     const res = await fetch('/api/categories/', {
       method: 'POST',
@@ -44,14 +46,14 @@
       await loadData();
       category_id = cat.id;
     } else {
-      alert('Не удалось создать категорию');
+      await showAlert('Не удалось создать категорию');
     }
   };
 
   const addAccount = async () => {
-    const name = prompt('Название счёта:');
+    const name = await showPrompt('Название счёта:');
     if (!name) return;
-    const balStr = prompt('Начальный баланс:', '0');
+    const balStr = await showPrompt('Начальный баланс:', '0');
     if (balStr === null) return;
     const balance = parseFloat(balStr) || 0;
     const res = await fetch('/api/accounts/', {
@@ -64,19 +66,19 @@
       await loadData();
       account_id = acc.id;
     } else {
-      alert('Не удалось создать счёт');
+      await showAlert('Не удалось создать счёт');
     }
   };
 
-  const handleCategoryChange = (e) => {
-    if (e.target.value === '__new__') {
+  const handleCategoryChange = (e: Event) => {
+    if ((e.target as HTMLSelectElement).value === '__new__') {
       addCategory();
       category_id = '';
     }
   };
 
-  const handleAccountChange = (e) => {
-    if (e.target.value === '__new__') {
+  const handleAccountChange = (e: Event) => {
+    if ((e.target as HTMLSelectElement).value === '__new__') {
       addAccount();
       account_id = '';
     }

@@ -1,5 +1,6 @@
-<script>
-  export let expenses = [];
+<script lang="ts">
+  import type { Expense } from '../lib/types';
+  export let expenses: Expense[] = [];
 </script>
 
 <table>

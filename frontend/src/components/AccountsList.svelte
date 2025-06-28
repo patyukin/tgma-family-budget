@@ -1,6 +1,7 @@
-<script>
-  export let accounts = [];
-  export let onDeposit;
+<script lang="ts">
+  import type { Account } from '../lib/types';
+  export let accounts: Account[] = [];
+  export let onDeposit: (acc: Account) => void;
 </script>
 
 <table>

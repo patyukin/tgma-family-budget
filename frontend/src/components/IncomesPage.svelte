@@ -1,7 +1,7 @@
-<script>
+<script lang="ts">
   import IncomeForm from './IncomeForm.svelte';
 
-  export let refreshGlobal;
+  export let refreshGlobal: () => Promise<void>;
 </script>
 
 <IncomeForm on:add={refreshGlobal} />
