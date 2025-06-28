@@ -1,5 +1,6 @@
 <script lang="ts">
   import { onMount } from 'svelte';
+  import { API_BASE_URL } from './lib/config';
   import type { Account, Expense, SummaryItem } from './lib/types';
   import ExpenseForm from './components/ExpenseForm.svelte';
   import IncomeForm from './components/IncomeForm.svelte';
@@ -18,14 +19,15 @@
   let accounts: Account[] = [];
 
   /**
-   * Fetch без использования кеша, добавляет query-параметр ts
-   * @param {string} url
+   * Fetch без использования кеша, добавляет query-параметр ts и базовый URL API
+   * @param {string} url - относительный путь API
    * @returns {Promise<Response>}
    */
   const fetchNoCache = (url: string): Promise<Response> => {
     const ts = Date.now();
-    const sep = url.includes('?') ? '&' : '?';
-    return fetch(`${url}${sep}ts=${ts}`, { cache: 'no-store' });
+    const fullUrl = `${API_BASE_URL}${url}`;
+    const sep = fullUrl.includes('?') ? '&' : '?';
+    return fetch(`${fullUrl}${sep}ts=${ts}`, { cache: 'no-store' });
   };
 
   const loadAccounts = async () => {
