@@ -18,6 +18,8 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       tag: ${{ steps.tag.outputs.tag }}
+    env:
+      VITE_APP_API_URL: ${{ secrets.VITE_APP_API_URL }}
 
     steps:
       - name: Checkout code
@@ -41,6 +43,7 @@ jobs:
 
           docker buildx build \
             --no-cache \
+            --build-arg VITE_APP_API_URL=$VITE_APP_API_URL \
             --push \
             --tag $REGISTRY/$BACKEND_IMAGE:${{ steps.tag.outputs.tag }} \
             --tag $REGISTRY/$BACKEND_IMAGE:latest \
@@ -51,6 +54,7 @@ jobs:
         run: |
           docker buildx build \
             --no-cache \
+            --build-arg VITE_APP_API_URL=$VITE_APP_API_URL \
             --push \
             --tag $REGISTRY/$FRONTEND_IMAGE:${{ steps.tag.outputs.tag }} \
             --tag $REGISTRY/$FRONTEND_IMAGE:latest \
