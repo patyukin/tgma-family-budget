@@ -8,12 +8,11 @@ export default defineConfig({
     port: 3000,
     proxy: {
       '/api/': {
-        target: 'http://fb-backend:8000',
+        target: process.env.VITE_APP_API_URL,
         changeOrigin: true,
         secure: false,
       }
     },
-    
   },
   build: {
     outDir: 'dist',
