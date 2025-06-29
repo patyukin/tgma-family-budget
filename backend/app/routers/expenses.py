@@ -33,7 +33,7 @@ async def list_expenses(session: AsyncSession = Depends(get_session)):
     res = await session.execute(select(models.Expense).options(selectinload(models.Expense.category)).order_by(models.Expense.spent_at.desc()))
     return res.scalars().all()
 
-@router.get("/{expense_id}", response_model=schemas.ExpenseOut)
+@router.get("/{expense_id:int}", response_model=schemas.ExpenseOut)
 async def get_expense(expense_id: int, session: AsyncSession = Depends(get_session)):
     res = await session.execute(select(models.Expense).options(selectinload(models.Expense.category)).where(models.Expense.id == expense_id))
     expense = res.scalar()
@@ -41,7 +41,7 @@ async def get_expense(expense_id: int, session: AsyncSession = Depends(get_sessi
         raise HTTPException(status_code=404, detail="Расход не найден")
     return expense
 
-@router.delete("/{expense_id}", response_model=schemas.ExpenseOut)
+@router.delete("/{expense_id:int}", response_model=schemas.ExpenseOut)
 async def delete_expense(expense_id: int, session: AsyncSession = Depends(get_session)):
     # Загружаем расход вместе с категорией
     res = await session.execute(

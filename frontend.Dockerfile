@@ -1,6 +1,10 @@
 # -------- Stage 1: Build --------
 FROM node:18-alpine AS builder
 
+# Build-time argument for API URL
+ARG VITE_APP_API_URL
+ENV VITE_APP_API_URL=$VITE_APP_API_URL
+
 # Set working directory
 WORKDIR /app
 

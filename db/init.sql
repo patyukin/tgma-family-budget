@@ -5,6 +5,14 @@ CREATE TABLE IF NOT EXISTS categories (
     name TEXT NOT NULL UNIQUE
 );
 
+-- Счета (кошельки, карты и т.д.)
+CREATE TABLE IF NOT EXISTS accounts (
+    id SERIAL PRIMARY KEY,
+    name TEXT NOT NULL UNIQUE,
+    balance NUMERIC(14,2) NOT NULL DEFAULT 0
+);
+
+-- Таблица расходов
 CREATE TABLE IF NOT EXISTS expenses (
     id SERIAL PRIMARY KEY,
     amount NUMERIC(14,2) NOT NULL,
@@ -22,13 +30,6 @@ INSERT INTO categories(name) VALUES ('Развлечения') ON CONFLICT DO NO
 -- =============================================================
 -- Дополнительные таблицы для расширенного учёта семейного бюджета
 -- =============================================================
-
--- Счета (кошельки, карты и т.д.)
-CREATE TABLE IF NOT EXISTS accounts (
-    id SERIAL PRIMARY KEY,
-    name TEXT NOT NULL UNIQUE,
-    balance NUMERIC(14,2) NOT NULL DEFAULT 0
-);
 
 -- Доходы
 CREATE TABLE IF NOT EXISTS incomes (

@@ -107,7 +107,7 @@
   };
   
   const loadSummary = async () => {
-    const endpoint = '/api/expenses/summary';
+    const endpoint = '/api/expenses/summary/';
     isLoading.summary = true;
     loadErrors.summary = null;
     

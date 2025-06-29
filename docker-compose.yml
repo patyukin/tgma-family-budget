@@ -24,9 +24,11 @@ services:
     build:
       context: .
       dockerfile: frontend.Dockerfile
+      args:
+        VITE_APP_API_URL: http://localhost:${BACKEND_PORT}
     environment:
-      - VITE_API_URL=http://localhost:${BACKEND_PORT}
-      - VITE_TELEGRAM_MINI_APP_URL=${TELEGRAM_MINI_APP_URL}
+      - VITE_APP_API_URL=http://localhost:${BACKEND_PORT}
+      - TELEGRAM_MINI_APP_URL=${TELEGRAM_MINI_APP_URL}
     ports:
       - "${FRONTEND_PORT}:80"
     depends_on:
@@ -41,6 +43,7 @@ services:
       - POSTGRES_PASSWORD=postgres
     volumes:
       - fb_db_data:/var/lib/postgresql/data
+      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
     ports:
       - "3032:5432"
     restart: unless-stopped
