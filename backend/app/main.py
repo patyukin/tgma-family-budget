@@ -3,7 +3,28 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from .routers import expenses, categories, accounts, incomes, transfers, budgets
 
+import logging, time
+from starlette.requests import Request
+from starlette.responses import Response
+from starlette.middleware.base import BaseHTTPMiddleware
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s | %(levelname)s | %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S",
+)
+
 app = FastAPI(title="Family Budget API")
+
+class LoggingMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, call_next):
+        start = time.time()
+        response: Response = await call_next(request)
+        duration_ms = (time.time() - start) * 1000
+        logging.info("%s %s -> %d %.1fms", request.method, request.url.path, response.status_code, duration_ms)
+        return response
+
+app.add_middleware(LoggingMiddleware)
 
 from .database import engine, Base
 
