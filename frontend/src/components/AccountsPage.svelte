@@ -8,8 +8,18 @@
 
   let accounts: Account[] = [];
   const loadAccounts = async () => {
-    const res = await fetch('/api/accounts');
-    accounts = await res.json();
+    try {
+      const res = await fetch('/api/accounts');
+      if (res.ok) {
+        accounts = await res.json();
+      } else {
+        console.error('Ошибка загрузки счетов:', res.status);
+        await showAlert('Не удалось загрузить счета');
+      }
+    } catch (error) {
+      console.error('Ошибка при загрузке счетов:', error);
+      await showAlert('Ошибка соединения с сервером');
+    }
   };
   onMount(loadAccounts);
 
