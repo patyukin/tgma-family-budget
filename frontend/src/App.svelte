@@ -68,6 +68,9 @@
       });
   };
 
+  // Утилита: возвращает массив записей независимо от формата ответа
+  const toArray = (data: any): any[] => Array.isArray(data) ? data : Array.isArray(data?.results) ? data.results : [];
+
   const loadAccounts = async () => {
     const endpoint = '/api/accounts/';
     isLoading.accounts = true;
@@ -77,7 +80,7 @@
       debug(`Загрузка счетов начата`);
       const res = await fetchNoCache(endpoint);
       const data = await logApiResponse(res, endpoint);
-      accounts = data;
+      accounts = toArray(data);
       info(`Загружено ${accounts.length} счетов`);
     } catch (err) {
       loadErrors.accounts = err instanceof Error ? err : new Error(String(err));
@@ -96,7 +99,7 @@
       debug(`Загрузка расходов начата`);
       const res = await fetchNoCache(endpoint);
       const data = await logApiResponse(res, endpoint);
-      expenses = data;
+      expenses = toArray(data);
       info(`Загружено ${expenses.length} расходов`);
     } catch (err) {
       loadErrors.expenses = err instanceof Error ? err : new Error(String(err));
@@ -115,7 +118,7 @@
       debug(`Загрузка сводки начата`);
       const res = await fetchNoCache(endpoint);
       const data = await logApiResponse(res, endpoint);
-      summary = data;
+      summary = toArray(data);
       info(`Загружена сводка: ${summary.length} записей`);
     } catch (err) {
       loadErrors.summary = err instanceof Error ? err : new Error(String(err));
